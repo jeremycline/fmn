@@ -1,4 +1,5 @@
 """Setup file for fmn"""
+import sys
 
 from setuptools import setup
 
@@ -26,6 +27,10 @@ def get_requirements(filename='requirements.txt'):
         ]
 
 
+requires = get_requirements()
+if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
+    requires.append("ordereddict")
+
 setup(
     name='fmn',
     version='1.1.0',
@@ -36,7 +41,7 @@ setup(
     url="https://github.com/fedora-infra/fmn",
     download_url="https://pypi.python.org/pypi/fmn/",
     license='LGPLv2+',
-    install_requires=get_requirements('requirements.txt'),
+    install_requires=requires,
     tests_require=get_requirements('dev-requirements.txt'),
     test_suite='nose.collector',
     packages=['fmn', 'fmn.rules', 'fmn.consumer', 'fmn.consumer.backends'],
