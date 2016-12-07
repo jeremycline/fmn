@@ -1,7 +1,7 @@
 """Setup file for fmn"""
 import sys
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def get_description():
@@ -31,6 +31,7 @@ requires = get_requirements()
 if sys.version_info[0] == 2 and sys.version_info[1] <= 6:
     requires.append("ordereddict")
 
+
 setup(
     name='fmn',
     version='1.1.0',
@@ -44,7 +45,7 @@ setup(
     install_requires=requires,
     tests_require=get_requirements('dev-requirements.txt'),
     test_suite='nose.collector',
-    packages=['fmn', 'fmn.rules', 'fmn.consumer', 'fmn.consumer.backends'],
+    packages=find_packages(exclude=['tests']),
     namespace_packages=['fmn'],
     include_package_data=True,
     zip_safe=False,
