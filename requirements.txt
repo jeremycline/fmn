@@ -1,7 +1,11 @@
+arrow
+bleach
 dogpile.cache
-fedmsg
+fedmsg[all]
 fedmsg_meta_fedora_infrastructure
-fmn.lib
+moksha.hub
+pika
 python-fedora
+redis
 requests
 six

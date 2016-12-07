@@ -1,18 +1,6 @@
-""" Setup file for fmn.rules """
-
-import sys
-import os
-import logging
+"""Setup file for fmn"""
 
 from setuptools import setup
-
-# Ridiculous as it may seem, we need to import multiprocessing and logging here
-# in order to get tests to pass smoothly on python 2.7.
-try:
-    import multiprocessing
-    import logging
-except:
-    pass
 
 
 def get_description():
@@ -39,19 +27,19 @@ def get_requirements(filename='requirements.txt'):
 
 
 setup(
-    name='fmn.rules',
-    version='0.9.1',
-    description='Message processing rules for Fedora Notifications',
+    name='fmn',
+    version='1.1.0',
+    description='FedMSG Notifications',
     long_description=get_description(),
     author='Ralph Bean',
     author_email='rbean@redhat.com',
-    url="https://github.com/fedora-infra/fmn.rules",
-    download_url="https://pypi.python.org/pypi/fmn.rules/",
+    url="https://github.com/fedora-infra/fmn",
+    download_url="https://pypi.python.org/pypi/fmn/",
     license='LGPLv2+',
     install_requires=get_requirements('requirements.txt'),
-    tests_require=get_requirements('tests-requirements.txt'),
+    tests_require=get_requirements('dev-requirements.txt'),
     test_suite='nose.collector',
-    packages=['fmn', 'fmn.rules'],
+    packages=['fmn', 'fmn.rules', 'fmn.consumer', 'fmn.consumer.backends'],
     namespace_packages=['fmn'],
     include_package_data=True,
     zip_safe=False,
@@ -61,4 +49,9 @@ setup(
         'Intended Audience :: Developers',
         'Programming Language :: Python',
     ],
+    entry_points={
+        'moksha.consumer': [
+            "fedmsg_notifications_consumer = fmn.consumer:FMNConsumer",
+        ],
+    },
 )

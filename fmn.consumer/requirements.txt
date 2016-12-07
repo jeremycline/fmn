@@ -1,8 +1,0 @@
-arrow
-bleach
-fedmsg[all]
-fmn.lib
-moksha.hub
-pika
-redis
-requests
