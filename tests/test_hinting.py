@@ -3,6 +3,9 @@ import unittest
 
 import fmn.rules
 import fmn.rules.bodhi
+import fmn.lib
+import fmn.lib.hinting
+import fmn.lib.tests
 
 
 class TestHinting(unittest.TestCase):
@@ -29,3 +32,53 @@ class TestHinting(unittest.TestCase):
                 fake_msg = dict(topic=topic)
                 if not rule['func'](empty_config, fake_msg):
                     raise ValueError('%r failed %r' % (topic, rule['title']))
+
+
+class TestHintDecoration(fmn.lib.tests.Base):
+    def test_hint_decoration(self):
+        rules = self.valid_paths['fmn.lib.tests.example_rules']
+        rule = rules['hint_masked_rule']
+
+        self.assertEqual(rule['title'], u'This is a docstring.')
+
+        self.assertEqual(len(rule['args']), 3)
+
+        self.assertEqual(rule['datanommer-hints'], {'categories': ['whatever']})
+
+    def test_hint_callable(self):
+        rules = self.valid_paths['fmn.lib.tests.example_rules']
+        rule = rules['callable_hint_masked_rule']
+        self.assertEqual(len(rule['args']), 3)
+        self.assertEqual(rule['datanommer-hints'], {})
+
+        class MockRule(object):
+            code_path = 'fmn.lib.tests.example_rules:callable_hint_masked_rule'
+            arguments = {
+                'argument1': 'cowabunga',
+            }
+            negated = False
+
+        rules = [MockRule()]
+
+        hints = fmn.lib.hinting.gather_hinting(
+            self.config, rules, self.valid_paths)
+        self.assertEqual(hints, {'the-hint-is': ['cowabunga']})
+
+    def test_inverted_hint_callable(self):
+        rules = self.valid_paths['fmn.lib.tests.example_rules']
+        rule = rules['callable_hint_masked_rule']
+        self.assertEqual(len(rule['args']), 3)
+        self.assertEqual(rule['datanommer-hints'], {})
+
+        class MockRule(object):
+            code_path = 'fmn.lib.tests.example_rules:callable_hint_masked_rule'
+            arguments = {
+                'argument1': 'cowabunga',
+            }
+            negated = True
+
+        rules = [MockRule()]
+
+        hints = fmn.lib.hinting.gather_hinting(
+            self.config, rules, self.valid_paths)
+        self.assertEqual(hints, {'not_the-hint-is': ['cowabunga']})
