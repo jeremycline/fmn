@@ -31,7 +31,8 @@ class GetPkgdb2PackagesForTests(Base):
     def setUp(self):
         super(GetPkgdb2PackagesForTests, self).setUp()
         self.config['fmn.rules.utils.use_pagure_for_ownership'] = False
-        self.config['fmn.rules.utils.pkgdb_url'] = 'https://admin.fedoraproject.org/pkgdb/api'
+        self.config['fmn.rules.utils.pkgdb_url'] = \
+            'https://admin.fedoraproject.org/pkgdb/api'
         self.expected_point_of_contact = {
             'rpms': set([
                 'erlang-cache_tab',
@@ -131,7 +132,8 @@ class GetPagurePackagesForTests(Base):
     def setUp(self):
         super(GetPagurePackagesForTests, self).setUp()
         self.config['fmn.rules.utils.use_pagure_for_ownership'] = True
-        self.config['fmn.rules.utils.pagure_api_url'] = 'https://src.stg.fedoraproject.org/pagure/api'
+        self.config['fmn.rules.utils.pagure_api_url'] = \
+            'https://src.stg.fedoraproject.org/pagure/api'
         self.expected_point_of_contact = {
             'rpms': set([
                 'erlang-cache_tab',
