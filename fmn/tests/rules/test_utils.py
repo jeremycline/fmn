@@ -29,6 +29,7 @@ class GetPkgdb2PackagesForTests(Base):
 
     def setUp(self):
         super(GetPkgdb2PackagesForTests, self).setUp()
+        self.config['fmn.rules.utils.use_pagure_for_ownership'] = False
         self.config['fmn.rules.utils.pkgdb_url'] = 'https://admin.fedoraproject.org/pkgdb/api'
         self.expected_point_of_contact = {
             'rpms': set([

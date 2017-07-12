@@ -93,7 +93,7 @@ def _get_packagers_for(config, package):
 def _get_pagure_packagers_for(config, package):
     log.debug("Requesting pagure packagers of package %r" % package)
     default = 'https://src.fedoraproject.org/pagure/api'
-    base = config.get('fmn.rules.utils.pagure_url', default)
+    base = config.get('fmn.rules.utils.pagure_api_url', default)
 
     # XXX. give a default namespace if one is not provided
     # Later, we need to come back in here and make all of this namespace-aware.
@@ -271,7 +271,7 @@ def _get_pagure_packages_for(config, username, flags):
         return set()
 
     default = 'https://src.fedoraproject.org/pagure/api'
-    base = config.get('fmn.rules.utils.pagure_url', default)
+    base = config.get('fmn.rules.utils.pagure_api_url', default)
     url = base + '/0/projects'
 
     packages = set()
