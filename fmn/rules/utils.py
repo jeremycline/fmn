@@ -268,13 +268,13 @@ def _get_pagure_packages_for(config, username, flags):
     valid = set(flags) & set(valid_flags)
     if not valid:
         log.error("No valid owner flags by which to query.")
-        return set()
+        return dict()
 
     default = 'https://src.fedoraproject.org/pagure/api'
     base = config.get('fmn.rules.utils.pagure_api_url', default)
     url = base + '/0/projects'
 
-    packages = set()
+    packages = defaultdict(set)
     for flag in valid:
         if flag == 'point of contact':
             params = dict(owner=username)
@@ -284,19 +284,16 @@ def _get_pagure_packages_for(config, username, flags):
             # Belt and suspenders.  We should never get here.
             raise NotImplementedError("%r is not a valid flag" % flag)
 
-        # TODO -- this all needs to be made namespace aware, eventually... but
-        # not now.
-        params['namespace'] = 'rpms'
-
         response = requests.get(url, params=params)
         if not response.status_code == 200:
             log.warn('URL %s returned code %s', response.url, response.status_code)
             continue
 
         data = response.json()
-        packages.update(set([p['name'] for p in data['projects']]))
+        for repo in data['projects']:
+            packages[repo['namespace']].add(repo['name'])
 
-    return packages
+    return dict(packages)
 
 
 def get_user_of_group(config, fas, groupname):
