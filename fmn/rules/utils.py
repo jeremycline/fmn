@@ -79,8 +79,47 @@ def get_packagers_of_package(config, package):
         _cache.configure(**config['fmn.rules.cache'].copy())
 
     key = cache_key_generator(get_packagers_of_package, package)
-    creator = lambda: _get_pkgdb2_packagers_for(config, package)
+    creator = lambda: _get_packagers_for(config, package)
     return _cache.get_or_create(key, creator)
+
+
+def _get_packagers_for(config, package):
+    if config['fmn.rules.utils.use_pagure_for_ownership']:
+        return _get_pagure_packagers_for(config, package)
+    else:
+        return _get_pkgdb2_packagers_for(config, package)
+
+
+def _get_pagure_packagers_for(config, package):
+    log.debug("Requesting pagure packagers of package %r" % package)
+    default = 'https://src.fedoraproject.org/pagure/api'
+    base = config.get('fmn.rules.utils.pagure_url', default)
+
+    # XXX. give a default namespace if one is not provided
+    # Later, we need to come back in here and make all of this namespace-aware.
+    if '/' not in package:
+        package = 'rpms/' + package
+
+    url = '{0}/0/{1}'.format(base, package)
+    log.info("hitting url: %r" % url)
+    response = requests.get(url)
+
+    if not response.status_code == 200:
+        log.warn('URL %s returned code %s', response.url, response.status_code)
+        return set()
+
+    data = response.json()
+
+    packagers = set(sum(data['access_users'].values(), []))
+    groups = set(sum(data['access_groups'].values(), []))
+
+    # XXX - Should we get group membership from pagure instead of FAS?  Ask pingou.
+    if groups:
+        fas = get_fas(config)
+    for group in groups:
+        packagers.update(get_user_of_group(config, fas, group))
+
+    return packagers
 
 
 def _get_pkgdb2_packagers_for(config, package):
@@ -142,7 +181,7 @@ def get_packages_of_user(config, username, flags):
 
     for owner in owners:
         key = cache_key_generator(get_packages_of_user, owner)
-        creator = lambda: _get_pkgdb2_packages_for(config, owner, flags)
+        creator = lambda: _get_packages_for(config, owner, flags)
         subset = _cache.get_or_create(key, creator)
         for namespace in subset:
             packages[namespace].update(subset[namespace])
@@ -160,6 +199,13 @@ def invalidate_cache_for(config, fn, arg):
 
     key = cache_key_generator(fn, arg)
     return _cache.delete(key)
+
+
+def _get_packages_for(config, username, flags):
+    if config['fmn.rules.utils.use_pagure_for_ownership']:
+        return _get_pagure_packages_for(config, username, flags)
+    else:
+        return _get_pkgdb2_packages_for(config, username, flags)
 
 
 def _get_pkgdb2_packages_for(config, username, flags):
@@ -196,6 +242,20 @@ def _get_pkgdb2_packages_for(config, username, flags):
         packages[package.get('namespace', 'rpms')].add(package['name'])
     log.debug("done talking with pkgdb2 for now.  %0.2fs", time.time() - start)
     return dict(packages)
+
+
+def _get_pagure_packages_for(config, username, flags):
+    """
+    Get the packages a user is associated with from pagure.
+
+    Args:
+        config (dict): The application configuration.
+        username (str): The FAS username to fetch the packages for.
+        flags (list): The type of relationship the user should have to the
+            package (e.g. "watch", "point of contact", etc.).
+    """
+    log.debug("Requesting pagure packages for user %r" % username)
+    raise NotImplementedError()
 
 
 def get_user_of_group(config, fas, groupname):
