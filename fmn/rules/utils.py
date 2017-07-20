@@ -4,6 +4,11 @@ from collections import defaultdict
 import logging
 import time
 
+try:
+    from urllib.parse import urlencode  # python3
+except ImportError:
+    from urllib import urlencode  # python2
+
 import requests
 import requests.exceptions
 
@@ -65,6 +70,30 @@ def get_fas(config):
     )
 
     return _FAS
+
+
+def _paginate_pagure_data(url, params, key):
+    # Set up the first page query
+    params['page'] = 1
+    next_page_url = url + "?" + urlencode(params)
+
+    while next_page_url is not None:
+        try:
+            response = requests.get(next_page_url, timeout=15)
+        except requests.exceptions.ConnectTimeout as e:
+            log.warn('URL %s timed out %r', response.url, e)
+            raise StopIteration
+
+        if not response.status_code == 200:
+            log.warn('URL %s returned code %s', response.url, response.status_code)
+            raise StopIteration
+
+        data = response.json()
+        for entry in data[key]:
+            yield entry
+
+        # When we run out of pages, this will be None
+        next_page_url = data['pagination']['next']
 
 
 def get_packagers_of_package(config, package):
@@ -341,18 +370,8 @@ def _get_pagure_packages_for(config, username, flags):
             # Belt and suspenders.  We should never get here.
             raise NotImplementedError("%r is not a valid flag" % flag)
 
-        try:
-            response = requests.get(url, params=params, timeout=15)
-        except requests.exceptions.ConnectTimeout as e:
-            log.warn('URL %s timed out %r', response.url, e)
-            continue
-
-        if not response.status_code == 200:
-            log.warn('URL %s returned code %s', response.url, response.status_code)
-            continue
-
-        data = response.json()
-        for repo in data['projects']:
+        repos = _paginate_pagure_data(url, params, key='projects')
+        for repo in repos:
             packages[repo['namespace']].add(repo['name'])
 
     return dict(packages)
