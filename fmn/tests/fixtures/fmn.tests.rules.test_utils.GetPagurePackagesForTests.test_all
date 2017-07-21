@@ -2087,4 +2087,268 @@ interactions:
           Expires=Sun, 20-Aug-2017 19:00:17 GMT; Secure; HttpOnly; Path=/pagure']
       strict-transport-security: [max-age=15768000; includeSubDomains; preload]
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.1]
+    method: GET
+    uri: https://src.stg.fedoraproject.org/pagure/api/0/projects?short=true&username=jcline&page=1
+  response:
+    body: {string: !!python/unicode "{\n  \"args\": {\n    \"fork\": null,\n    \"namespace\":
+        null,\n    \"owner\": null,\n    \"page\": 1,\n    \"pattern\": null,\n    \"per_page\":
+        20,\n    \"short\": true,\n    \"tags\": [],\n    \"username\": \"jcline\"\n
+        \ },\n  \"pagination\": {\n    \"first\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=1\",\n
+        \   \"last\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=3\",\n
+        \   \"next\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=2\",\n
+        \   \"page\": 1,\n    \"pages\": 3,\n    \"per_page\": 20,\n    \"prev\":
+        null\n  },\n  \"projects\": [\n    {\n      \"description\": \"The ejabberd
+        rpms\",\n      \"fullname\": \"rpms/ejabberd\",\n      \"name\": \"ejabberd\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-cache_tab rpms\",\n      \"fullname\": \"rpms/erlang-cache_tab\",\n
+        \     \"name\": \"erlang-cache_tab\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-esip rpms\",\n      \"fullname\":
+        \"rpms/erlang-esip\",\n      \"name\": \"erlang-esip\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-ezlib rpms\",\n
+        \     \"fullname\": \"rpms/erlang-ezlib\",\n      \"name\": \"erlang-ezlib\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-fast_tls rpms\",\n      \"fullname\": \"rpms/erlang-fast_tls\",\n      \"name\":
+        \"erlang-fast_tls\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-fast_xml rpms\",\n      \"fullname\": \"rpms/erlang-fast_xml\",\n
+        \     \"name\": \"erlang-fast_xml\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-fast_yaml rpms\",\n      \"fullname\":
+        \"rpms/erlang-fast_yaml\",\n      \"name\": \"erlang-fast_yaml\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-goldrush rpms\",\n
+        \     \"fullname\": \"rpms/erlang-goldrush\",\n      \"name\": \"erlang-goldrush\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-iconv rpms\",\n      \"fullname\": \"rpms/erlang-iconv\",\n      \"name\":
+        \"erlang-iconv\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-luerl rpms\",\n      \"fullname\": \"rpms/erlang-luerl\",\n      \"name\":
+        \"erlang-luerl\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-oauth2 rpms\",\n      \"fullname\": \"rpms/erlang-oauth2\",\n
+        \     \"name\": \"erlang-oauth2\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-p1_iconv rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_iconv\",\n      \"name\": \"erlang-p1_iconv\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_mysql rpms\",\n
+        \     \"fullname\": \"rpms/erlang-p1_mysql\",\n      \"name\": \"erlang-p1_mysql\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-p1_oauth2 rpms\",\n      \"fullname\": \"rpms/erlang-p1_oauth2\",\n
+        \     \"name\": \"erlang-p1_oauth2\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-p1_pam rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_pam\",\n      \"name\": \"erlang-p1_pam\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_pgsql rpms\",\n
+        \     \"fullname\": \"rpms/erlang-p1_pgsql\",\n      \"name\": \"erlang-p1_pgsql\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-p1_sip rpms\",\n      \"fullname\": \"rpms/erlang-p1_sip\",\n      \"name\":
+        \"erlang-p1_sip\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-p1_stringprep rpms\",\n      \"fullname\": \"rpms/erlang-p1_stringprep\",\n
+        \     \"name\": \"erlang-p1_stringprep\",\n      \"namespace\": \"rpms\"\n
+        \   },\n    {\n      \"description\": \"The erlang-p1_stun rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_stun\",\n      \"name\": \"erlang-p1_stun\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_tls rpms\",\n
+        \     \"fullname\": \"rpms/erlang-p1_tls\",\n      \"name\": \"erlang-p1_tls\",\n
+        \     \"namespace\": \"rpms\"\n    }\n  ],\n  \"total_projects\": 46\n}"}
+    headers:
+      appserver: [proxy01.stg.phx2.fedoraproject.org]
+      apptime: [D=2775561]
+      connection: [Keep-Alive]
+      content-length: ['3879']
+      content-type: [application/json]
+      date: ['Fri, 21 Jul 2017 16:46:46 GMT']
+      keep-alive: ['timeout=15, max=500']
+      server: [Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.1e-fips mod_auth_gssapi/1.4.0
+          mod_wsgi/3.4 Python/2.7.5]
+      set-cookie: ['disgit_pagure=eyJfcGVybWFuZW50Ijp0cnVlfQ.DFPBeA.60ygyslc95-xclCmjA5nTO64-w8;
+          Expires=Mon, 21-Aug-2017 16:46:48 GMT; Secure; HttpOnly; Path=/pagure']
+      strict-transport-security: [max-age=15768000; includeSubDomains; preload]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.1]
+    method: GET
+    uri: https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=2
+  response:
+    body: {string: !!python/unicode "{\n  \"args\": {\n    \"fork\": null,\n    \"namespace\":
+        null,\n    \"owner\": null,\n    \"page\": 2,\n    \"pattern\": null,\n    \"per_page\":
+        20,\n    \"short\": true,\n    \"tags\": [],\n    \"username\": \"jcline\"\n
+        \ },\n  \"pagination\": {\n    \"first\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=1\",\n
+        \   \"last\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=3\",\n
+        \   \"next\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=3\",\n
+        \   \"page\": 2,\n    \"pages\": 3,\n    \"per_page\": 20,\n    \"prev\":
+        \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=1\"\n
+        \ },\n  \"projects\": [\n    {\n      \"description\": \"The erlang-p1_utils
+        rpms\",\n      \"fullname\": \"rpms/erlang-p1_utils\",\n      \"name\": \"erlang-p1_utils\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-p1_xml rpms\",\n      \"fullname\": \"rpms/erlang-p1_xml\",\n      \"name\":
+        \"erlang-p1_xml\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-p1_xmlrpc rpms\",\n      \"fullname\": \"rpms/erlang-p1_xmlrpc\",\n
+        \     \"name\": \"erlang-p1_xmlrpc\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-p1_yaml rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_yaml\",\n      \"name\": \"erlang-p1_yaml\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_zlib rpms\",\n
+        \     \"fullname\": \"rpms/erlang-p1_zlib\",\n      \"name\": \"erlang-p1_zlib\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-proper rpms\",\n      \"fullname\": \"rpms/erlang-proper\",\n      \"name\":
+        \"erlang-proper\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The erlang-stringprep rpms\",\n      \"fullname\": \"rpms/erlang-stringprep\",\n
+        \     \"name\": \"erlang-stringprep\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-stun rpms\",\n      \"fullname\":
+        \"rpms/erlang-stun\",\n      \"name\": \"erlang-stun\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The pulp rpms\",\n      \"fullname\":
+        \"rpms/pulp\",\n      \"name\": \"pulp\",\n      \"namespace\": \"rpms\"\n
+        \   },\n    {\n      \"description\": \"The pulp-docker rpms\",\n      \"fullname\":
+        \"rpms/pulp-docker\",\n      \"name\": \"pulp-docker\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The pulp-ostree rpms\",\n
+        \     \"fullname\": \"rpms/pulp-ostree\",\n      \"name\": \"pulp-ostree\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        pulp-puppet rpms\",\n      \"fullname\": \"rpms/pulp-puppet\",\n      \"name\":
+        \"pulp-puppet\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The pulp-python rpms\",\n      \"fullname\": \"rpms/pulp-python\",\n      \"name\":
+        \"pulp-python\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The pulp-rpm rpms\",\n      \"fullname\": \"rpms/pulp-rpm\",\n      \"name\":
+        \"pulp-rpm\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-args rpms\",\n      \"fullname\": \"rpms/python-args\",\n      \"name\":
+        \"python-args\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-clint rpms\",\n      \"fullname\": \"rpms/python-clint\",\n      \"name\":
+        \"python-clint\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-crane rpms\",\n      \"fullname\": \"rpms/python-crane\",\n      \"name\":
+        \"python-crane\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-flower rpms\",\n      \"fullname\": \"rpms/python-flower\",\n
+        \     \"name\": \"python-flower\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The python-invocations rpms\",\n      \"fullname\":
+        \"rpms/python-invocations\",\n      \"name\": \"python-invocations\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The python-isodate rpms\",\n
+        \     \"fullname\": \"rpms/python-isodate\",\n      \"name\": \"python-isodate\",\n
+        \     \"namespace\": \"rpms\"\n    }\n  ],\n  \"total_projects\": 46\n}"}
+    headers:
+      appserver: [proxy01.stg.phx2.fedoraproject.org]
+      apptime: [D=2567971]
+      connection: [Keep-Alive]
+      content-length: ['3888']
+      content-type: [application/json]
+      date: ['Fri, 21 Jul 2017 16:46:49 GMT']
+      keep-alive: ['timeout=15, max=500']
+      server: [Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.1e-fips mod_auth_gssapi/1.4.0
+          mod_wsgi/3.4 Python/2.7.5]
+      set-cookie: ['disgit_pagure=eyJfcGVybWFuZW50Ijp0cnVlfQ.DFPBew.FAwnmZGNRXGORs72JyZeFEXrvCM;
+          Expires=Mon, 21-Aug-2017 16:46:51 GMT; Secure; HttpOnly; Path=/pagure']
+      strict-transport-security: [max-age=15768000; includeSubDomains; preload]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.1]
+    method: GET
+    uri: https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=3
+  response:
+    body: {string: !!python/unicode "{\n  \"args\": {\n    \"fork\": null,\n    \"namespace\":
+        null,\n    \"owner\": null,\n    \"page\": 3,\n    \"pattern\": null,\n    \"per_page\":
+        20,\n    \"short\": true,\n    \"tags\": [],\n    \"username\": \"jcline\"\n
+        \ },\n  \"pagination\": {\n    \"first\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=1\",\n
+        \   \"last\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=3\",\n
+        \   \"next\": null,\n    \"page\": 3,\n    \"pages\": 3,\n    \"per_page\":
+        20,\n    \"prev\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?username=jcline&per_page=20&short=true&page=2\"\n
+        \ },\n  \"projects\": [\n    {\n      \"description\": \"The python-pkginfo
+        rpms\",\n      \"fullname\": \"rpms/python-pkginfo\",\n      \"name\": \"python-pkginfo\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        python-pymongo rpms\",\n      \"fullname\": \"rpms/python-pymongo\",\n      \"name\":
+        \"python-pymongo\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-releases rpms\",\n      \"fullname\": \"rpms/python-releases\",\n
+        \     \"name\": \"python-releases\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The python-rpdb rpms\",\n      \"fullname\":
+        \"rpms/python-rpdb\",\n      \"name\": \"python-rpdb\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The python-sphinxcontrib-fulltoc
+        rpms\",\n      \"fullname\": \"rpms/python-sphinxcontrib-fulltoc\",\n      \"name\":
+        \"python-sphinxcontrib-fulltoc\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The python-twine rpms\",\n      \"fullname\":
+        \"rpms/python-twine\",\n      \"name\": \"python-twine\",\n      \"namespace\":
+        \"rpms\"\n    }\n  ],\n  \"total_projects\": 46\n}"}
+    headers:
+      appserver: [proxy01.stg.phx2.fedoraproject.org]
+      apptime: [D=909745]
+      connection: [Keep-Alive]
+      content-length: ['1672']
+      content-type: [application/json]
+      date: ['Fri, 21 Jul 2017 16:46:52 GMT']
+      keep-alive: ['timeout=15, max=500']
+      server: [Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.1e-fips mod_auth_gssapi/1.4.0
+          mod_wsgi/3.4 Python/2.7.5]
+      set-cookie: ['disgit_pagure=eyJfcGVybWFuZW50Ijp0cnVlfQ.DFPBfQ.GREIBSForxrNntCAXfGY8uhv2BQ;
+          Expires=Mon, 21-Aug-2017 16:46:53 GMT; Secure; HttpOnly; Path=/pagure']
+      strict-transport-security: [max-age=15768000; includeSubDomains; preload]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.1]
+    method: GET
+    uri: https://src.stg.fedoraproject.org/pagure/api/0/projects?short=true&owner=jcline&page=1
+  response:
+    body: {string: !!python/unicode "{\n  \"args\": {\n    \"fork\": null,\n    \"namespace\":
+        null,\n    \"owner\": \"jcline\",\n    \"page\": 1,\n    \"pattern\": null,\n
+        \   \"per_page\": 20,\n    \"short\": true,\n    \"tags\": [],\n    \"username\":
+        null\n  },\n  \"pagination\": {\n    \"first\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?owner=jcline&per_page=20&short=true&page=1\",\n
+        \   \"last\": \"https://src.stg.fedoraproject.org/pagure/api/0/projects?owner=jcline&per_page=20&short=true&page=1\",\n
+        \   \"next\": null,\n    \"page\": 1,\n    \"pages\": 1,\n    \"per_page\":
+        20,\n    \"prev\": null\n  },\n  \"projects\": [\n    {\n      \"description\":
+        \"The erlang-cache_tab rpms\",\n      \"fullname\": \"rpms/erlang-cache_tab\",\n
+        \     \"name\": \"erlang-cache_tab\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-p1_sip rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_sip\",\n      \"name\": \"erlang-p1_sip\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_stringprep
+        rpms\",\n      \"fullname\": \"rpms/erlang-p1_stringprep\",\n      \"name\":
+        \"erlang-p1_stringprep\",\n      \"namespace\": \"rpms\"\n    },\n    {\n
+        \     \"description\": \"The erlang-p1_stun rpms\",\n      \"fullname\": \"rpms/erlang-p1_stun\",\n
+        \     \"name\": \"erlang-p1_stun\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The erlang-p1_tls rpms\",\n      \"fullname\":
+        \"rpms/erlang-p1_tls\",\n      \"name\": \"erlang-p1_tls\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The erlang-p1_xml rpms\",\n
+        \     \"fullname\": \"rpms/erlang-p1_xml\",\n      \"name\": \"erlang-p1_xml\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        erlang-p1_yaml rpms\",\n      \"fullname\": \"rpms/erlang-p1_yaml\",\n      \"name\":
+        \"erlang-p1_yaml\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-args rpms\",\n      \"fullname\": \"rpms/python-args\",\n      \"name\":
+        \"python-args\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-clint rpms\",\n      \"fullname\": \"rpms/python-clint\",\n      \"name\":
+        \"python-clint\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-flower rpms\",\n      \"fullname\": \"rpms/python-flower\",\n
+        \     \"name\": \"python-flower\",\n      \"namespace\": \"rpms\"\n    },\n
+        \   {\n      \"description\": \"The python-invocations rpms\",\n      \"fullname\":
+        \"rpms/python-invocations\",\n      \"name\": \"python-invocations\",\n      \"namespace\":
+        \"rpms\"\n    },\n    {\n      \"description\": \"The python-pkginfo rpms\",\n
+        \     \"fullname\": \"rpms/python-pkginfo\",\n      \"name\": \"python-pkginfo\",\n
+        \     \"namespace\": \"rpms\"\n    },\n    {\n      \"description\": \"The
+        python-releases rpms\",\n      \"fullname\": \"rpms/python-releases\",\n      \"name\":
+        \"python-releases\",\n      \"namespace\": \"rpms\"\n    },\n    {\n      \"description\":
+        \"The python-sphinxcontrib-fulltoc rpms\",\n      \"fullname\": \"rpms/python-sphinxcontrib-fulltoc\",\n
+        \     \"name\": \"python-sphinxcontrib-fulltoc\",\n      \"namespace\": \"rpms\"\n
+        \   },\n    {\n      \"description\": \"The python-twine rpms\",\n      \"fullname\":
+        \"rpms/python-twine\",\n      \"name\": \"python-twine\",\n      \"namespace\":
+        \"rpms\"\n    }\n  ],\n  \"total_projects\": 15\n}"}
+    headers:
+      appserver: [proxy01.stg.phx2.fedoraproject.org]
+      apptime: [D=2757199]
+      connection: [Keep-Alive]
+      content-length: ['3025']
+      content-type: [application/json]
+      date: ['Fri, 21 Jul 2017 16:46:53 GMT']
+      keep-alive: ['timeout=15, max=500']
+      server: [Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.1e-fips mod_auth_gssapi/1.4.0
+          mod_wsgi/3.4 Python/2.7.5]
+      set-cookie: ['disgit_pagure=eyJfcGVybWFuZW50Ijp0cnVlfQ.DFPBgA.N0x0EHE9TYpCdWuSZvgjty0mxLU;
+          Expires=Mon, 21-Aug-2017 16:46:56 GMT; Secure; HttpOnly; Path=/pagure']
+      strict-transport-security: [max-age=15768000; includeSubDomains; preload]
+    status: {code: 200, message: OK}
 version: 1
