@@ -81,7 +81,7 @@ def _paginate_pagure_data(url, params, key):
 
     while next_page_url is not None:
         try:
-            response = requests.get(next_page_url, timeout=15)
+            response = requests.get(next_page_url, timeout=25)
         except requests.exceptions.ConnectTimeout as e:
             log.warn('URL %s timed out %r', response.url, e)
             raise StopIteration
@@ -153,7 +153,7 @@ def _get_pagure_packagers_for(config, package):
     url = '{0}/0/{1}'.format(base, package)
     log.info("Querying Pagure at %s for packager information", url)
     try:
-        response = requests.get(url, timeout=15)
+        response = requests.get(url, timeout=25)
     except requests.exceptions.ConnectTimeout as e:
         log.warn('URL %s timed out %r', response.url, e)
         return set()
