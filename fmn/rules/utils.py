@@ -75,6 +75,8 @@ def get_fas(config):
 def _paginate_pagure_data(url, params, key):
     # Set up the first page query
     params['page'] = 1
+    # Also, set the short param to make the queries lighter
+    params['short'] = 'true'
     next_page_url = url + "?" + urlencode(params)
 
     while next_page_url is not None:
