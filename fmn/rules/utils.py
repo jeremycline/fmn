@@ -4,11 +4,7 @@ from collections import defaultdict
 import logging
 import time
 
-try:
-    from urllib.parse import urlencode  # python3
-except ImportError:
-    from urllib import urlencode  # python2
-
+from six.moves.urllib.parse import urlencode
 import requests
 import requests.exceptions
 
