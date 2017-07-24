@@ -69,6 +69,23 @@ def get_fas(config):
 
 
 def _paginate_pagure_data(url, params, key):
+    """
+    Paginate over a Pagure URL.
+
+    Args:
+        url (str): The URL to paginate over, without any parameters.
+        params (dict): A dictionary of URL parameters to use when querying Pagure.
+        key (str): The key in the JSON response from Pagure to iterate over.
+
+    Yields:
+        object: The object in the response corresponding to the provided ``key``.
+            The type will vary based on the API and ``key``.
+
+    Raises:
+        KeyError: If the provided key is not in the JSON response.
+        StopIteration: If any network problems are encountered or if Pagure returns
+            anything other than an HTTP 200 response code.
+    """
     # Set up the first page query
     params['page'] = 1
     # Also, set the short param to make the queries lighter
