@@ -68,47 +68,43 @@ def get_fas(config):
     return _FAS
 
 
-def _paginate_pagure_data(url, params, key):
+def _paginate_pagure_data(url, params):
     """
     Paginate over a Pagure URL.
 
     Args:
         url (str): The URL to paginate over, without any parameters.
         params (dict): A dictionary of URL parameters to use when querying Pagure.
-        key (str): The key in the JSON response from Pagure to iterate over.
 
     Yields:
-        object: The object in the response corresponding to the provided ``key``.
-            The type will vary based on the API and ``key``.
+        dict: The deserialized JSON response for a given page.
 
     Raises:
         KeyError: If the provided key is not in the JSON response.
         StopIteration: If any network problems are encountered or if Pagure returns
             anything other than an HTTP 200 response code.
     """
+
     # Set up the first page query
     params['page'] = 1
-    # Also, set the short param to make the queries lighter
-    params['short'] = 'true'
     next_page_url = url + "?" + urlencode(params)
 
-    while next_page_url is not None:
+    while next_page_url:
         try:
             response = requests.get(next_page_url, timeout=25)
-        except requests.exceptions.ConnectTimeout as e:
-            log.warn('URL %s timed out %r', response.url, e)
-            raise StopIteration
+            if response.status_code == 200:
+                data = response.json()
+                # When we run out of pages, this will be None
+                next_page_url = data['pagination']['next']
+                yield data
+            else:
+                log.error('Querying Pagure at %s returned code %s',
+                          response.url, response.status_code)
+                next_page_url = None
 
-        if not response.status_code == 200:
-            log.warn('URL %s returned code %s', response.url, response.status_code)
-            raise StopIteration
-
-        data = response.json()
-        for entry in data[key]:
-            yield entry
-
-        # When we run out of pages, this will be None
-        next_page_url = data['pagination']['next']
+        except requests.exceptions.Timeout as e:
+            log.warn('URL %s timed out %r', next_page_url, e)
+            next_page_url = None
 
 
 def get_packagers_of_package(config, package):
@@ -154,11 +150,10 @@ def _get_pagure_packagers_for(config, package):
     Returns:
         set:  A `set` of packager usernames.
     """
-    log.debug("Requesting pagure packagers of package %r" % package)
     base = config.get('fmn.rules.utils.pagure_api_url',
                       'https://src.fedoraproject.org/pagure/api')
 
-    # XXX. give a default namespace if one is not provided
+    # Give a default namespace if one is not provided. See
     # https://github.com/fedora-infra/fmn/issues/208
     if '/' not in package:
         package = 'rpms/' + package
@@ -167,8 +162,8 @@ def _get_pagure_packagers_for(config, package):
     log.info("Querying Pagure at %s for packager information", url)
     try:
         response = requests.get(url, timeout=25)
-    except requests.exceptions.ConnectTimeout as e:
-        log.warn('URL %s timed out %r', response.url, e)
+    except requests.exceptions.Timeout as e:
+        log.warn('URL %s timed out %r', url, e)
         return set()
 
     if response.status_code != 200:
@@ -352,42 +347,42 @@ def _get_pagure_packages_for(config, username, flags):
         username (str): The FAS username to fetch the packages for.
         flags (list): The type of relationship the user should have to the
             package (e.g. "watch", "point of contact", etc.).
+
     Returns:
-        dict:  A `dict` mapping namespaces to sets of package names.
+        dict:  A dictionary mapping namespaces to sets of package names.
+
+    Raises:
+        ValueError: If invalid flags are provided, or no flags are provided.
     """
     log.debug("Requesting pagure packages for user %r" % username)
 
+    # In the future we want to also support the 'watch' state.
     # See https://github.com/fedora-infra/fmn/issues/209
     # which depends on https://pagure.io/pagure/issue/2421
-    valid_flags = ['point of contact', 'co-maintained']#, 'watch']
+    valid_flags = ['point of contact', 'co-maintained']
 
     bogus = set(flags) - set(valid_flags)
     if bogus:
-        log.error("%r are not valid owner flags for %r." % (bogus, username))
-        # ... but, proceed.
-
-    valid = set(flags) & set(valid_flags)
-    if not valid:
-        log.error("No valid owner flags by which to query.")
-        return dict()
+        raise ValueError(
+            "{flags} are not valid owner flags for {user}.".format(flags=bogus, user=username))
+    if len(flags) == 0:
+        raise ValueError("No valid owner flags by which to query.")
 
     base = config.get('fmn.rules.utils.pagure_api_url',
                       'https://src.fedoraproject.org/pagure/api')
     url = base + '/0/projects'
 
     packages = defaultdict(set)
-    for flag in valid:
+    for flag in flags:
         if flag == 'point of contact':
-            params = dict(owner=username)
-        elif flag == 'co-maintained':
-            params = dict(username=username)
-        else:
-            # Belt and suspenders.  We should never get here.
-            raise NotImplementedError("%r is not a valid flag" % flag)
+            params = dict(owner=username, short=True)
+        else:  # 'co-maintained'
+            params = dict(username=username, short=True)
 
-        repos = _paginate_pagure_data(url, params, key='projects')
-        for repo in repos:
-            packages[repo['namespace']].add(repo['name'])
+        pages = _paginate_pagure_data(url, params)
+        for page in pages:
+            for repo in page['projects']:
+                packages[repo['namespace']].add(repo['name'])
 
     return dict(packages)
 

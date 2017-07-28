@@ -21,6 +21,9 @@ from __future__ import unicode_literals
 
 import unittest
 
+from requests.exceptions import ConnectTimeout, ReadTimeout
+import mock
+
 from fmn.rules import utils
 from fmn.tests import Base
 
@@ -145,16 +148,19 @@ class GetPagurePackagesForTests(Base):
                 'erlang-p1_yaml',
                 'python-args',
                 'python-clint',
+                'python-cryptography',
+                'python-cryptography-vectors',
                 'python-flower',
                 'python-invocations',
                 'python-pkginfo',
                 'python-releases',
                 'python-sphinxcontrib-fulltoc',
-                'python-twine',
+                'python-twine'
             ])
         }
         self.expected_comaintained = {
             'rpms': set([
+                'bodhi',
                 'ejabberd',
                 'erlang-cache_tab',
                 'erlang-esip',
@@ -183,27 +189,26 @@ class GetPagurePackagesForTests(Base):
                 'erlang-proper',
                 'erlang-stringprep',
                 'erlang-stun',
-                'pulp',
-                'pulp-docker',
-                'pulp-ostree',
-                'pulp-puppet',
-                'pulp-python',
-                'pulp-rpm',
                 'python-args',
+                'python-chardet',
                 'python-clint',
                 'python-crane',
+                'python-cryptography',
+                'python-cryptography-vectors',
                 'python-flower',
+                'python-idna',
                 'python-invocations',
+                'python-ipdb',
                 'python-isodate',
                 'python-pkginfo',
                 'python-pymongo',
+                'python-pytoml',
                 'python-releases',
                 'python-rpdb',
                 'python-sphinxcontrib-fulltoc',
                 'python-twine',
             ])
         }
-        self.expected_watch = {}
         self.expected_all = {
             'rpms': self.expected_comaintained['rpms'].union(
                 self.expected_point_of_contact['rpms']),
@@ -211,13 +216,30 @@ class GetPagurePackagesForTests(Base):
 
     def test_bad_response(self):
         """Assert a bad response results in an empty result."""
-        packages = utils._get_pagure_packages_for(self.config, 'thisisnotausername123', [])
+        packages = utils._get_pagure_packages_for(
+            self.config, 'thisisnotausername123', ['co-maintained'])
         self.assertEqual(dict(), packages)
 
-    def test_watch(self):
-        """Assert watch results from pagure works."""
-        packages = utils._get_pagure_packages_for(self.config, 'jcline', ['watch'])
-        self.assertEqual(self.expected_watch, packages)
+    @mock.patch('fmn.rules.utils.requests.get', mock.Mock(side_effect=ConnectTimeout))
+    def test_connect_failure(self):
+        """Assert a bad response results in an empty result."""
+        packages = utils._get_pagure_packages_for(self.config, 'jcline', ['co-maintained'])
+        self.assertEqual(dict(), packages)
+
+    @mock.patch('fmn.rules.utils.requests.get', mock.Mock(side_effect=ReadTimeout))
+    def test_read_failure(self):
+        """Assert a bad response results in an empty result."""
+        packages = utils._get_pagure_packages_for(self.config, 'jcline', ['co-maintained'])
+        self.assertEqual(dict(), packages)
+
+    def test_no_flags(self):
+        """Assert passing no flags earns the caller a ValueError."""
+        self.assertRaises(ValueError, utils._get_pagure_packages_for, self.config, 'jcline', [])
+
+    def test_invalid_flags(self):
+        """Assert passing an invalid flags earns the caller a ValueError."""
+        self.assertRaises(
+            ValueError, utils._get_pagure_packages_for, self.config, 'jcline', ['flag'])
 
     def test_comaintained(self):
         """Assert co-maintained results from pagure works."""
@@ -231,8 +253,75 @@ class GetPagurePackagesForTests(Base):
 
     def test_all(self):
         packages = utils._get_pagure_packages_for(
-            self.config, 'jcline', ['point of contact', 'watch', 'co-maintained'])
+            self.config, 'jcline', ['point of contact', 'co-maintained'])
         self.assertEqual(self.expected_all, packages)
+
+
+class GetPagurePackagersForTests(Base):
+
+    def setUp(self):
+        super(GetPagurePackagersForTests, self).setUp()
+
+        self.config = {
+            'fmn.rules.utils.use_pagure_for_ownership': True,
+            'fmn.rules.utils.pagure_api_url': 'https://src.stg.fedoraproject.org/pagure/api',
+        }
+
+    def test_no_groups(self):
+        """Assert packages without groups return the expected set of packagers."""
+        expected_packagers = set(['bowlofeggs', 'jcline', 'xavierb', 'martinlanghoff', 'peter'])
+        packagers = utils._get_packagers_for(self.config, 'rpms/ejabberd')
+
+        self.assertEqual(expected_packagers, packagers)
+
+    def test_groups(self):
+        infra_group = set([
+            'abompard',
+            'bochecha',
+            'bowlofeggs',
+            'codeblock',
+            'jcline',
+            'kevin',
+            'lmacken',
+            'pingou',
+            'puiterwijk',
+            'sayanchowdhury',
+            'toshio',
+        ])
+        committers = set([
+            'abompard',
+            'jcline',
+            'ralph',
+            'sagarun',
+        ])
+
+        packagers = utils._get_packagers_for(self.config, 'rpms/python-urllib3')
+
+        self.assertEqual(infra_group.union(committers), packagers)
+
+    def test_no_namespace(self):
+        """Assert packages without a namespace default to RPM."""
+        expected_packagers = set(['bowlofeggs', 'jcline', 'xavierb', 'martinlanghoff', 'peter'])
+        packagers = utils._get_packagers_for(self.config, 'ejabberd')
+
+        self.assertEqual(expected_packagers, packagers)
+
+    @mock.patch('fmn.rules.utils.requests.get', mock.Mock(side_effect=ReadTimeout))
+    def test_read_timeout(self):
+        packagers = utils._get_packagers_for(self.config, 'rpms/ejabberd')
+
+        self.assertEqual(set(), packagers)
+
+    @mock.patch('fmn.rules.utils.requests.get', mock.Mock(side_effect=ConnectTimeout))
+    def test_connect_timeout(self):
+        packagers = utils._get_packagers_for(self.config, 'rpms/ejabberd')
+
+        self.assertEqual(set(), packagers)
+
+    def test_error_response(self):
+        packagers = utils._get_packagers_for(self.config, 'notanamespace/orapackage')
+
+        self.assertEqual(set(), packagers)
 
 
 if __name__ == '__main__':
