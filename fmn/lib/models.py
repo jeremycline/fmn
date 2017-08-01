@@ -125,6 +125,20 @@ def init(db_url, alembic_ini=None, debug=False, create=False):
 
 
 class Context(BASE):
+    """
+    A messaging context (backend).
+
+    A message context is a way to send a message (email, IRC, etc).
+
+    Attributes:
+        name (str): The backend's name.
+        description (str): A short description of the backend.
+        created_on (sa.DateTime): The time when the context was created.
+        detail_name (str): The context delivery mechanism name ("email address",
+            "irc nick", etc).
+        icon (str): The icon name to use in the user interface.
+        placeholder (str): The default ``default_name`` value to prompt the user.
+    """
     __tablename__ = 'contexts'
     name = sa.Column(sa.String(50), primary_key=True)
     description = sa.Column(sa.String(1024), unique=True)
@@ -185,6 +199,16 @@ class Context(BASE):
 
 
 class User(BASE):
+    """
+    An FMN user.
+
+    Attributes:
+        openid (str): The user's Open ID. For example, u'jcline.id.fedoraproject.org'.
+        openid_url (str): The user's Open ID URL. For example,
+            u'http://jcline.id.fedoraproject.org/'.
+        api_key (str): A string UUID.
+        created_on (sa.DateTime): The time the user was created on.
+    """
     __tablename__ = 'users'
 
     openid = sa.Column(sa.Text, primary_key=True)
@@ -278,6 +302,23 @@ def _cached_load_class(load_path):
 
 
 class Rule(BASE):
+    """
+    An individual filter rule.
+
+    Each filter is made up of zero or more rules.
+
+    Attributes:
+        id (int): The primary key for the table.
+        created_on (sa.DateTime): The time this rule was created on.
+        filter_id (int): A :class:`Filter` id.
+        filter (Filter): The related filter.
+        code_path (str): The Python path to a callable that accepts two positional
+            arguments, config and message, as well as any keyword arguments stored
+            in ``_arguments``. It should return True if the message matches.
+        _arguments (str): A JSON-encoded dictionary of keyword arguments to pass to
+            the ``code_path`` function.
+        negated (bool): If True, the result of ``code_path`` is negated.
+    """
     __tablename__ = 'rules'
     id = sa.Column(sa.Integer, primary_key=True)
     created_on = sa.Column(sa.DateTime, default=datetime.datetime.utcnow)
@@ -378,6 +419,23 @@ class Rule(BASE):
 
 
 class Filter(BASE):
+    """
+    A message filter.
+
+    A user can define zero or more of these filters for each context (backend). These are
+    related to backends by way of the user's :class:`Preference` for each backend. If any
+    filter matches, the message is delivered to the user via that backend.
+
+    Attributes:
+        id (int): An integer that identifies this filter and the primary key for this table.
+        created_on (sa.DateTime): The time this filter was created.
+        name (str): The filter's user-friendly name.
+        active (bool): If True, this filter is used to match against messages.
+        oneshot (bool): If True, this filter is deactivated after its first match.
+        preference_id (int): The foreign key to the :class:`Preference`.
+        preference (Preference): The user preference this filter is associated with.
+        rules (sqlalchemy.orm.collections.InstrumentedList): A list of :class:`Rule`.
+    """
     __tablename__ = 'filters'
     id = sa.Column(sa.Integer, primary_key=True)
     created_on = sa.Column(sa.DateTime, default=datetime.datetime.utcnow)
@@ -512,6 +570,32 @@ class DetailValue(BASE):
 
 
 class Preference(BASE):
+    """
+    User preferences for a messaging context (backend).
+
+    These preferences apply to all filters a user defines for a particular
+    context and a user may only have one preference per context.
+
+    Attributes:
+        id (int): The primary key and internal identifier for a preference.
+        created_on (sa.DateTime): The time this preference was created.
+        batch_delta (int): The digest interval, in seconds. When this is not
+            ``None``, messages are delivered in batches.
+        batch_count (int): The maximum number of messages to include in a digest.
+            When this is set, it takes precedence over ``batch_delta``.
+        enabled (bool): True if this context is enabled. Defaults to False to
+            allow users to opt-in.
+        markup_messages (bool): If True, messages will use markup rather than plain
+            text.
+        triggered_by_links (bool): If True, messages will include a link to the
+            filter that triggered the message to be sent.
+        shorten_links (bool): If true, links will be shortened using a URL shortener
+            service.
+        verbose (bool): If True, messages will be more verbose.
+        openid (str): The user's OpenID. This is a foreign key to a :class:`User`.
+        context (str): The context (backend) name. This is a foreign key to a
+            :class:`Context`.
+    """
     __tablename__ = 'preferences'
     id = sa.Column(sa.Integer, primary_key=True)
     created_on = sa.Column(sa.DateTime, default=datetime.datetime.utcnow)
@@ -523,9 +607,6 @@ class Preference(BASE):
     # medium.
     batch_count = sa.Column(sa.Integer, nullable=True)
 
-    # Hold the state of start/stop commands to the irc bot and others.
-    # Disabled by default so that we can provide robust default filters without
-    # forcing new users into an opt-out situation.
     enabled = sa.Column(sa.Boolean, default=False, nullable=False)
 
     # Various presentation booleans
