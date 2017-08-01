@@ -542,6 +542,27 @@ def _get_filter(openid, context, filter_id, authz=True):
 @api_method
 @login_required
 def example_messages(openid, context, filter_id, page, endtime):
+    """
+    Retrieve a list of example messages that would match the filter.
+
+    Args:
+        openid (str): The user's OpenID.
+        context (str): The context (backend) this preference is for.
+        filter_id (int): The filter ID.
+        page (int): The page of example messages to return. This should initially be 1.
+            The API will return the next page number and adjust the endtime once it has
+            run out of pages for that endtime.
+        endtime (int): When searching for messages, look for messages older than this Unix
+            epoch time.
+
+    Returns:
+        dict: A dictionary in the format::
+            {
+                'results': [{'icon': str, 'icon2': str, 'subtitle': str, 'link': str, 'time': str}]
+                'next_page': int
+                'endtime': int
+            }
+    """
     if flask.g.auth.openid != openid and not admin(flask.g.auth.openid):
         flask.abort(403)
 
@@ -551,60 +572,58 @@ def example_messages(openid, context, filter_id, page, endtime):
 
     pref = fmn.lib.models.Preference.get_or_create(
         SESSION, openid=openid, context=context)
-
     if not pref.has_filter(SESSION, filter_id):
         flask.abort(404)
 
-    filter = pref.get_filter(SESSION, filter_id)
-
-    hinting = fmn.lib.hinting.gather_hinting(
-        fedmsg_config, filter.rules, valid_paths)
-
-    # Now, connect to datanommer and get the latest bazillion messages
-    # (adjusting by any hinting the rules we're evalulating might provide).
-    bazillion = 400
-
-    # Search in two month windows (to make things faster)
-    delta = datetime.timedelta(days=60)
     end = datetime.datetime.fromtimestamp(endtime)
     if end < before_fedmsg:
+        # If the end is before the epoch of fedmsg, just stop now.
         raise APIError(404, dict(
             reason="No matching messages could be found.",
             furthermore="",
         ))
 
-    try:
-        total, pages, messages = datanommer.models.Message.grep(
-            start=end-delta,
-            end=end,
-            rows_per_page=bazillion,
-            page=page,
-            order='desc',
-            **hinting
-        )
-    except Exception as e:
-        log.exception(e)
-        raise APIError(500, dict(
-            reason="Error talking to datanommer",
-            furthermore=str(e),
-        ))
+    filter = pref.get_filter(SESSION, filter_id)
+    hinting = fmn.lib.hinting.gather_hinting(
+        fedmsg_config, filter.rules, valid_paths)
+    delta = datetime.timedelta(days=60)
+    total, pages, messages = datanommer.models.Message.grep(
+        start=end - delta,
+        end=end,
+        rows_per_page=400,
+        page=page,
+        order='desc',
+        **hinting
+    )
 
-    def _make_result(msg, d):
-        """ Little utility used inside the loop below """
-        return {
-            'icon': fedmsg.meta.msg2icon(d, **fedmsg_config),
-            'icon2': fedmsg.meta.msg2secondary_icon(d, **fedmsg_config),
-            'subtitle': fedmsg.meta.msg2subtitle(d, **fedmsg_config),
-            'link': fedmsg.meta.msg2link(d, **fedmsg_config),
-            'time': arrow.get(msg.timestamp).humanize(),
-        }
+    next_page = page + 1
+    if page > pages:
+        # If we ran out of pages, then shift to the next time window
+        next_page = 1
+        endtime = endtime - delta.total_seconds()
+    return {
+        'next_page': next_page,
+        'endtime': endtime,
+        'results': _match_example_messages(pref, filter, messages),
+    }
+
+
+def _match_example_messages(preference, filter, messages):
+    """
+    Match a set of messages for a given preference and filter.
+
+    Args:
+        preference (fmn.lib.models.Preference): The preference to use when matching.
+        filter (fmn.lib.models.Filter): The filter on the preference to use when matching.
+        messages (list): A list of :class:`datanommer.models.Message` to match.
+    """
 
     # Mock out a fake 'cached preferences' object like we have in the consumer,
     # but really it just consists of the one preferences and its *one* filter
     # for which we're trying to find example messages.
-    preferences = [pref.__json__()]
-    preferences[0]['detail_values'] = ['mock']
-    preferences[0]['filters'] = [filter.__json__(reify=True)]
+    preferences = {'nobody_mock': preference.__json__()}
+    preferences['nobody_mock']['detail_values'] = ['mock']
+    preferences['nobody_mock']['filters'] = [filter.__json__(reify=True)]
 
     results = []
     for message in messages:
@@ -612,19 +631,15 @@ def example_messages(openid, context, filter_id, page, endtime):
         recips = fmn.lib.recipients(
             preferences, message.__json__(), valid_paths, fedmsg_config)
         if recips:
-            results.append(_make_result(message, original))
+            results.append({
+                'icon': fedmsg.meta.msg2icon(original, **fedmsg_config),
+                'icon2': fedmsg.meta.msg2secondary_icon(original, **fedmsg_config),
+                'subtitle': fedmsg.meta.msg2subtitle(original, **fedmsg_config),
+                'link': fedmsg.meta.msg2link(original, **fedmsg_config),
+                'time': arrow.get(message.timestamp).humanize(),
+            })
 
-    next_page = page + 1
-    if page > pages:
-        # If we ran out of pages, then shift to the next time window
-        next_page = 1
-        endtime = endtime - delta.total_seconds()
-
-    return dict(
-        results=results,
-        next_page=next_page,
-        endtime=endtime,
-    )
+    return results
 
 
 @app.route('/confirm/<action>/<secret>')
