@@ -20,6 +20,7 @@ Administrator's Guide
 
    installation
    configuration
+   architecture
 
 
 User's Guide
