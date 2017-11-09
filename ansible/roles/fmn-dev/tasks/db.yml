@@ -37,16 +37,28 @@
 - name: Start and enable postgresql
   service: name=postgresql state=restarted enabled=yes
 
-- name: Set up the DB user
+- name: Set up the DB datanommer user
   postgresql_user:
       name: datanommer
   become_user: postgres
 
-- name: Create the database
+- name: Set up the DB fmn user
+  postgresql_user:
+      name: fmn
+  become_user: postgres
+
+- name: Create the datanommer database
   postgresql_db:
       name: datanommer
       owner: datanommer
-  register: db_creation
+  register: datanommer_db_creation
+  become_user: postgres
+
+- name: Create the fmn database
+  postgresql_db:
+      name: fmn
+      owner: fmn
+  register: fmn_db_creation
   become_user: postgres
 
 - name: Create /home/vagrant/alembic.ini
@@ -65,8 +77,18 @@
     regexp: "^sqlalchemy.url = sqlite.*$"
     replace: "sqlalchemy.url = postgresql://postgres:anypasswordworkslocally@localhost/datanommer"
 
-- name: Create the database schema
+- name: Create the datanommer database schema
   become_user: "{{ ansible_env.SUDO_USER }}"
   command: /usr/bin/datanommer-create-db
   args:
       chdir: /home/vagrant/
+
+- name: Create the fmn database schema
+  become_user: "{{ ansible_env.SUDO_USER }}"
+  command: /home/vagrant/.virtualenvs/fmn/bin/fmn-createdb -c
+  when: fmn_db_creation
+
+- name: Stamp the database with the alembic revision
+  become_user: "{{ ansible_env.SUDO_USER }}"
+  command: /home/vagrant/.virtualenvs/fmn/bin/alembic stamp head
+  when: fmn_db_creation

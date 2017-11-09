@@ -141,7 +141,7 @@ Available Configuration Keys
 ``fmn.sqlalchemy.uri``
     :class:`str`: The URI of the database to use for users and preferences.
 
-    Default: ``'sqlite:////var/tmp/fmn-dev-db.sqlite'``
+    Default: ``'postgresql://postgres:postgres@localhost/fmn'``
 
 .. _fmn-sqlalchemy-debug:
 
@@ -389,6 +389,14 @@ Available Configuration Keys
             },
         }
 
+.. _reap_results_older_than:
+
+``reap_results_older_than``
+    :class:`int`: Remove task results older than the given number of days.
+
+    Default:: 7 (one week).
+
+
 .. _fedmsg's configuration: https://fedmsg.readthedocs.io/en/stable/configuration/
 """
 import fedmsg
@@ -493,7 +501,7 @@ class _FmnConfig(dict):
             'validator': None,
         },
         'fmn.sqlalchemy.uri': {
-            'default': 'sqlite:////var/tmp/fmn-dev-db.sqlite',
+            'default': 'postgresql://postgres:postgres@localhost/fmn',
             'validator': str,
         },
         'fmn.sqlalchemy.debug': {
@@ -620,6 +628,11 @@ class _FmnConfig(dict):
             'default': {
                 'broker': 'amqp://',
                 'include': ['fmn.tasks'],
+                'result_backend': 'db+postgresql://postgres:postgres@localhost/fmn',
+                'database_table_names': {
+                    'task': 'fmn_task_metadata',
+                    'group': 'fmn_group_metadata',
+                },
                 'accept_content': ['json'],
                 'task_serializer': 'json',
                 'task_default_queue': 'fmn.tasks.unprocessed_messages',
@@ -632,9 +645,17 @@ class _FmnConfig(dict):
                       'task': 'fmn.tasks.confirmations',
                       'schedule': 15.0,
                     },
+                    'reap-results': {
+                      'task': 'fmn.tasks.reap_results',
+                      'schedule': 3600.0,
+                    },
                 },
             },
             'validator': None,
+        },
+        'reap_task_results_older_than': {
+            'default': 7,
+            'validator': int,
         },
         'logging': {
             'default': {

@@ -27,6 +27,7 @@ from __future__ import absolute_import
 
 import datetime
 
+from celery.backends.database import models as celery_models
 from celery.utils.log import get_task_logger
 from fedmsg_meta_fedora_infrastructure import fasshim
 from kombu import Connection, Queue
@@ -334,6 +335,24 @@ def heat_fas_cache():  # pragma: no cover
     IRC nickname eventually.
     """
     fmn_fasshim.make_fas_cache(**config.app_conf)
+
+
+@app.task(name='fmn.tasks.reap_results')
+def reap_results():
+    """Reap old task results from the database."""
+    session = models.Session()
+    filter_time = datetime.datetime.utcnow() - datetime.timedelta(
+        config.app_conf['reap_task_results_older_than'])
+    task_q = session.query(celery_models.Task).filter(
+        celery_models.Task.date_done <= filter_time)
+    taskset_q = session.query(celery_models.TaskSet).filter(
+        celery_models.TaskSet.date_done <= filter_time)
+    old_task_count = task_q.count()
+    old_taskset_count = taskset_q.count()
+    task_q.delete()
+    taskset_q.delete()
+    session.commit()
+    return {'old_tasks': old_task_count, 'old_taskset_count': old_taskset_count}
 
 
 @app.task(name='fmn.tasks.confirmations', ignore_results=True)
