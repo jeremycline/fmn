@@ -20,13 +20,12 @@ import kombu
 import fmn.lib
 import fmn.rules.utils
 from fmn import config
-from fmn.celery import RELOAD_CACHE_EXCHANGE_NAME
 from .util import (
     new_packager,
     new_badges_user,
     get_fas_email,
 )
-from fmn.tasks import find_recipients, REFRESH_CACHE_TOPIC, heat_fas_cache
+from fmn.tasks import find_recipients, heat_fas_cache
 
 
 log = logging.getLogger("fmn")
@@ -127,13 +126,7 @@ class FMNConsumer(fedmsg.consumers.FedmsgConsumer):
         # time and update themselves dynamically here.
 
         if '.fmn.' in topic:
-            openid = msg['msg']['openid']
-            _log.info('Broadcasting message to Celery workers to update cache for %s', openid)
-            find_recipients.apply_async(
-                ({'topic': 'fmn.internal.refresh_cache', 'body': openid},),
-                exchange=RELOAD_CACHE_EXCHANGE_NAME,
-                routing_key=config.app_conf['celery']['task_default_queue'],
-            )
+            return
 
         # If a user has tweaked something in the pkgdb2 db, then invalidate our
         # dogpile cache.. but only the parts that have something to do with any
@@ -170,11 +163,6 @@ class FMNConsumer(fedmsg.consumers.FedmsgConsumer):
                 )
                 session.add(user)
                 session.commit()
-                _log.info('Broadcasting message to Celery workers to update cache for %s', openid)
-                find_recipients.apply_async(
-                    ({'topic': REFRESH_CACHE_TOPIC, 'body': openid},),
-                    exchange=RELOAD_CACHE_EXCHANGE_NAME,
-                )
 
         # Do the same dogpile.cache invalidation trick that we did above, but
         # here do it for fas group membership changes.  (This is important

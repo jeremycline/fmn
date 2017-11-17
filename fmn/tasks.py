@@ -26,6 +26,7 @@ This module contains the `Celery tasks`_ used by FMN.
 from __future__ import absolute_import
 
 import datetime
+import time
 
 from celery.utils.log import get_task_logger
 from fedmsg_meta_fedora_infrastructure import fasshim
@@ -81,6 +82,7 @@ class _FindRecipients(task.Task):
         fedmsg.meta.make_processors(**config.app_conf)
         self._valid_paths = None
         self._user_preferences = None
+        self._last_load = 0
         _log.info('Initialization complete for the "%s" task', self.name)
 
     @property
@@ -107,10 +109,11 @@ class _FindRecipients(task.Task):
         don't load all the user preferences when the task is registered with
         Celery.
         """
-        if self._user_preferences is None:
+        if self._user_preferences is None or time.time() - self._last_load > 300:
             _log.info('Loading all user preferences from the database')
             self._user_preferences = fmn_lib.load_preferences(
                 cull_disabled=True, cull_backends=['desktop'])
+            self._last_load = time.time()
             _log.info('All user preferences successfully loaded from the database')
         return self._user_preferences
 
@@ -145,14 +148,6 @@ class _FindRecipients(task.Task):
         """
         _log.debug('Determining recipients for message "%r"', message)
         topic, message_body = message['topic'], message['body']
-
-        # We send a fake message with this topic as a broadcast to all workers in order for them
-        # to refresh their caches, so if this message is a cache refresh notification stop early.
-        if topic == REFRESH_CACHE_TOPIC:
-            _log.info('Refreshing the user preferences for %s', message_body)
-            fmn_lib.update_preferences(message_body, self.user_preferences)
-            return
-
         results = fmn_lib.recipients(
              self.user_preferences, message_body, self.valid_paths, config.app_conf)
         _log.info('Found %s recipients for message %s', sum(map(len, results.values())),
