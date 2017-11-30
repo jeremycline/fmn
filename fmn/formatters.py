@@ -103,45 +103,44 @@ def shorten(link):
         return link
 
 
-def irc(msg, recipient):
+def irc(message, recipient):
     """
     Format a fedmsg for delivery via IRC.
 
     Args:
-        msg (dict): The fedmsg's message body.
+        message (dict): The fedmsg's message body.
         recipient (dict): The recipient's formatting preferences.
 
     Returns:
         str: A human-readable message suitable for delivery to the user.
     """
-    # Here we have to distinguish between two different kinds of messages that
-    # might arrive: the `raw` message from fedmsg itself and the product of a
-    # call to `fedmsg.meta.conglomerate(..)`
-    if 'subtitle' not in msg:
-        # This handles normal, 'raw' messages which get passed through msg2*.
-        title = fedmsg.meta.msg2title(msg, **config.app_conf)
-        subtitle = fedmsg.meta.msg2subtitle(msg, **config.app_conf)
-        link = fedmsg.meta.msg2link(msg, **config.app_conf)
-        # Only prefix with topic if we're "marking up" messages.
-        if recipient['markup_messages']:
-            template = u"{title} -- {subtitle} {delta}{link}{flt}"
-        else:
-            template = u"{subtitle} {delta}{link}{flt}"
+    if recipient['markup_messages']:
+        template = u"{title} -- {subtitle} {delta} {link} {flt}"
     else:
-        # This handles messages that have already been 'conglomerated'.
-        title = u""
-        subtitle = msg['subtitle']
-        link = msg['link']
-        template = u"{subtitle} {delta}{link}{flt}"
-
-    if recipient['shorten_links']:
-        link = shorten(link)
+        template = u"{subtitle} {delta} {link} {flt}"
+    title = 'Unknown title'
+    subtitle = 'Unknown subtitle'
+    link = None
+    try:
+        title = fedmsg.meta.msg2title(message, **config.app_conf)
+    except Exception:
+        _log.exception('Unable to produce a message title for %r', message)
+    try:
+        subtitle = fedmsg.meta.msg2subtitle(message, **config.app_conf)
+    except Exception:
+        _log.exception('Unable to produce a message subtitle for %r', message)
+    try:
+        link = fedmsg.meta.msg2link(message, **config.app_conf)
+        if recipient['shorten_links']:
+            link = shorten(link)
+    except Exception:
+        _log.exception('Unable to produce a message link for %r', message)
 
     # Tack a human-readable delta on the end so users know that fmn is
     # backlogged (if it is).
     delta = ''
-    if time.time() - msg['timestamp'] > 10:
-        delta = arrow.get(msg['timestamp']).humanize() + ' '
+    if time.time() - message['timestamp'] > 10:
+        delta = arrow.get(message['timestamp']).humanize()
 
     flt = ''
     if recipient['triggered_by_links'] and 'filter_id' in recipient:
@@ -150,7 +149,7 @@ def irc(msg, recipient):
             base_url=config.app_conf['fmn.base_url'], **recipient)
         if recipient['shorten_links']:
             flt_link = shorten(flt_link)
-        flt = "    ( triggered by %s )" % flt_link
+        flt = "(triggered by %s)" % flt_link
 
     if recipient['markup_messages']:
         def markup(s, color):
@@ -163,7 +162,7 @@ def irc(msg, recipient):
             link = markup(link, "teal")
 
     return template.format(title=title, subtitle=subtitle, delta=delta,
-                           link=link, flt=flt)
+                           link=link, flt=flt).strip()
 
 
 def irc_batch(messages, recipient):
@@ -177,7 +176,45 @@ def irc_batch(messages, recipient):
     if len(messages) == 1:
         return irc(messages[0], recipient)
     else:
-        return fedmsg.meta.conglomerate(messages, **config.app_conf)
+        template = u'{subtitle} {delta} {link} {filter_link}\n'
+        formatted_message = u''
+        try:
+            # This apparently returns a list of dicts with the 'link', 'subtitle',
+            # 'subjective', 'secondary_icon' and any number of other keys from the
+            # individual conglomerator.
+            conglomerated = fedmsg.meta.conglomerate(messages, **config.app_conf)
+            for message in conglomerated:
+                formatted_message += template.format(
+                    subtitle=message['subtitle'], delta=message.get('human_time', ''),
+                    link=message['link'], filter_link=_irc_filter_link(recipient))
+        except Exception:
+            formatted_message = (
+                u'You received {} notifications in this batch, but something went wrong when '
+                u'making them human-readable. The message IDs are: \n').format(len(messages))
+            for message in messages:
+                if 'msg_id' in message:
+                    formatted_message += u'{}\n'.format(message['msg_id'])
+        return formatted_message
+
+
+def _irc_filter_link(recipient):
+    """
+    Create a link to the recipient's filter that triggered this message.
+
+    Args:
+        recipient: The recipient dictionary.
+    Returns:
+        six.text_type: A (potentially shortened) link to the user's filter or
+            an empty string if the user has turned off the setting to include
+            links to the triggered filter.
+    """
+    if recipient['triggered_by_links'] and 'filter_id' in recipient:
+        link = u'{base_url}{user}/irc/{filter_id}'.format(
+            base_url=config.app_conf['fmn.base_url'], **recipient)
+        if recipient['shorten_links']:
+            link = shorten(link)
+        return link
+    return u''
 
 
 def irc_confirmation(confirmation):
